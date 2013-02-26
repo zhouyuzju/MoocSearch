@@ -7,33 +7,41 @@ sys.path.append('../')
 from dao.courseDAO import courseDAO
 
 class CourseraParser():
-
+	"""
+		Init coursera parser
+	"""
 	def __init__(self):
 		self.html = ''
 		self.baseUrl = 'https://www.coursera.org/course/'
-		self.cats = {}
-		self.courses = {}
-		self.insts = {}
-		self.topics = {}
-		self.unis = {}
+		self.cats = {}		#belong to which categray
+		self.courses = {}	#course schedule
+		self.insts = {}		#professor
+		self.topics = {}	#course information
+		self.unis = {}		#university
 
+	"""
+		Extract info from json response data
+		Insert or update the database
+	"""
 	def extract(self,url):
-		self.html = urlopen(url).read()
-		jsondata = json.loads(self.html)
+		self.html = urlopen(url).read()		#read from json format data
+		jsondata = json.loads(self.html)	#parser json data
 		jsoncourses = jsondata['courses']
 		jsoncats = jsondata['cats']
 		jsoninsts = jsondata['insts']
 		jsontopics = jsondata['topics']
 		jsonunis = jsondata['unis']
+
 		for item in jsoncats:
 			self.cats[item['id']] = item
 		for item in jsoncourses:
-			if item['status'] == 1:
+			if item['status'] == 1:		#current available courses
 				self.courses[int(item['topic_id'])] = item
 		for item in jsoninsts:
 			self.insts[item['id']] = item
 		for item in jsonunis:
 			self.unis[item['id']] = item
+
 		for id in jsontopics:
 			info = jsontopics[id]
 			self.topics[int(id)] = info
@@ -42,7 +50,7 @@ class CourseraParser():
 			url = self.baseUrl + info['short_name'].encode('utf-8')
 			insts = ','.join([' '.join([self.insts[inst]['first_name'].encode('utf-8'),self.insts[inst]['last_name'].encode('utf-8')]) for inst in info.get('insts',[])])
 			insts = insts.strip().strip(',')
-			if not int(id) in self.courses.keys():
+			if not int(id) in self.courses.keys():		#courses which are not available yet
 				start_year = 0
 				start_month = 0
 				start_day = 0
@@ -52,15 +60,22 @@ class CourseraParser():
 				start_month = self.courses[int(id)]['start_month']
 				start_day = self.courses[int(id)]['start_day']
 				duration_string = self.courses[int(id)]['duration_string']
-				if start_year == None:start_year = 0
+				#date to be announced
+				if start_year == None:start_year = 0	
 				if start_month == None:start_month = 0
 				if start_day == None:start_day = 0
+
 				if duration_string == '':duration_time = 0
 				else: duration_time = duration_string.split(' weeks')[0].encode('utf-8')
-			dao = courseDAO()
 			detail = ''
 			record = [name,insts,university,url,detail,start_year,start_month,start_day,duration_time]
-			dao.insert(record)
+			#insert or update the database
+			dao = courseDAO()
+			if not dao.exist(url):
+				dao.insert(record)
+			else:
+				record.append(url)
+				dao.update(record)
 			#print ''.join([name,url,university,insts,str(start_year),str(start_month),str(start_day),duration_time])
 
 if __name__ == '__main__':
