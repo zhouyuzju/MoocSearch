@@ -14,6 +14,7 @@ class CanvasParser():
 	def __init__(self):
 		self.html = ''
 		self.soup = None
+		self.req = None
 		#abbreviation to digital dic
 		self.MONTHDIC = {'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12}	
 	"""
@@ -21,7 +22,8 @@ class CanvasParser():
 		Won't work when web document changes
 	"""
 	def extract(self,url):
-		self.html = urlopen(url).read()
+		self.req = urlopen(url)
+		self.html = self.req.read()
 		self.soup = BeautifulSoup(self.html)
 		courseLinks = self.soup.findAll('a',{'class':'featured-course-live'})
 		courseNames = self.soup.findAll('span',{'class':'featured-course-title'})
@@ -49,6 +51,9 @@ class CanvasParser():
 				record.append(url)
 				dao.update(record)
 
+	def __del__(self):
+		self.req.close()
+	
 if __name__ == '__main__':
 	parser = CanvasParser()
 	parser.extract('https://www.canvas.net/')

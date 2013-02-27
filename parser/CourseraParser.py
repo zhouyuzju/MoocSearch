@@ -20,13 +20,15 @@ class CourseraParser():
 		self.insts = {}		#professor
 		self.topics = {}	#course information
 		self.unis = {}		#university
+		self.req = None
 
 	"""
 		Extract info from json response data
 		Insert or update the database
 	"""
 	def extract(self,url):
-		self.html = urlopen(url).read()		#read from json format data
+		self.req = urlopen(url)
+		self.html = self.req.read()		#read from json format data
 		jsondata = json.loads(self.html)	#parser json data
 		jsoncourses = jsondata['courses']
 		jsoncats = jsondata['cats']
@@ -79,6 +81,9 @@ class CourseraParser():
 				record.append(url)
 				dao.update(record)
 			#print ''.join([name,url,university,insts,str(start_year),str(start_month),str(start_day),duration_time])
+
+	def __del__(self):
+		self.req.close()
 
 if __name__ == '__main__':
 	parser = CourseraParser()
