@@ -5,7 +5,9 @@ import datetime
 import sys
 sys.path.append('../')
 from dao.courseDAO import courseDAO
-
+"""
+Coursera online course web crawler(https://www.coursera.org/)
+"""
 class CourseraParser():
 	"""
 		Init coursera parser
