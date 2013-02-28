@@ -80,11 +80,11 @@ class CourseraParser():
 			else:
 				record.append(url)
 				dao.update(record)
-			#print ''.join([name,url,university,insts,str(start_year),str(start_month),str(start_day),duration_time])
+			#print record
 
 	def __del__(self):
 		self.req.close()
 
 if __name__ == '__main__':
 	parser = CourseraParser()
-	parser.extract('https://www.coursera.org/maestro/api/topic/list2?orderby=new&page=0&page-size=1000')
+	parser.extract('https://www.coursera.org/maestro/api/topic/list2')
