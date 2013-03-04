@@ -69,8 +69,8 @@ class CourseraParser():
 				if start_month == None:start_month = 0
 				if start_day == None:start_day = 0
 
-				if duration_string == '':duration_time = 0
-				else: duration_time = duration_string.split(' weeks')[0].encode('utf-8')
+				if not duration_string == '':
+					duration_time = duration_string.encode('utf-8')
 			detail = ''
 			record = [name,insts,university,url,detail,start_year,start_month,start_day,duration_time]
 			#insert or update the database
